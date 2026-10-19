@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voz Animal - Denuncie Maus Tratos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1 href="index.html">VOZ ANIMAL</h1>
+                <span>Denuncie, Proteja, Cuide</span>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="doe.html">Doe</a></li>
+                    <li><a href="adote.html">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </nav>
+            <div class="header-action">
+                <a href="#denuncia-section" class="btn-denuncie">DENUNCIE</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero" data-theme="dark">
+            <div class="hero-bg" style="background-image: url('img/imgFundoHome.png');"></div>
+            <div class="container hero-content">
+                <div class="hero-text-box" data-reveal>
+                    <h2>Eles não podem <br> pedir ajuda</h2>
+                    <p>Mas você pode ser a voz deles.</p>
+                    <a href="#denuncia-section" class="btn-hero">Denunciar</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Denúncia (Toda Vida Importa) -->
+        <section id="denuncia-section" class="denuncia-intro" data-theme="light">
+            <div class="container">
+                <div class="content-wrapper">
+                    <div class="text-content" data-reveal>
+                        <h3>Toda vida <br> importa</h3>
+                        <p>Formalize denúncias de maus-tratos de forma simples, segura e acessível. Sua atitude salva vidas.</p>
+                        <button class="btn-register">Registrar Denúncia</button>
+                    </div>
+                    <div class="image-content" data-reveal>
+                        <img src="img/image.png" alt="Animal resgatado" class="reveal-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Mapa de Denúncias -->
+        <section id="mapa-denuncias" class="mapa-section" data-theme="light">
+            <div class="container">
+                <div class="mapa-header text-center" data-reveal>
+                    <h3 class="section-title">Mapa de Denúncias</h3>
+                    <p class="section-desc">Acompanhe em tempo real as áreas com maior incidência de denúncias em Itu e região. Cada ponto representa um registro recebido pela plataforma.</p>
+                </div>
+
+                <div class="indicadores-denuncias" data-reveal>
+                    <div class="indicadores-header">
+                        <div>
+                            <h4>Visão geral das denúncias</h4>
+                            <p id="indicadores-status">Carregando indicadores do banco de dados...</p>
+                        </div>
+                        <div class="indicador-total">
+                            <span>Total geral</span>
+                            <strong id="stat-total-denuncias">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="indicadores-grid">
+                        <article class="indicador-card indicador-abandono">
+                            <div class="indicador-icon">
+                                <i data-lucide="home"></i>
+                            </div>
+                            <span>Abandono</span>
+                            <strong id="stat-abandono">--</strong>
+                            <small>registros</small>
+                        </article>
+
+                        <article class="indicador-card indicador-agressao">
+                            <div class="indicador-icon">
+                                <i data-lucide="alert-triangle"></i>
+                            </div>
+                            <span>Agressão</span>
+                            <strong id="stat-agressao">--</strong>
+                            <small>registros</small>
+                        </article>
+
+                        <article class="indicador-card indicador-negligencia">
+                            <div class="indicador-icon">
+                                <i data-lucide="alert-circle"></i>
+                            </div>
+                            <span>Negligência</span>
+                            <strong id="stat-negligencia">--</strong>
+                            <small>registros</small>
+                        </article>
+
+                        <article class="indicador-card indicador-outros">
+                            <div class="indicador-icon">
+                                <i data-lucide="info"></i>
+                            </div>
+                            <span>Outros</span>
+                            <strong id="stat-outros">--</strong>
+                            <small>registros</small>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Container do Mapa + Legenda -->
+                <div class="mapa-wrapper" data-reveal>
+                    <div id="map-container" class="map-container"></div>
+                    <aside class="mapa-legenda">
+                        <h4>Legenda</h4>
+                        <ul>
+                            <li>
+                                <span class="legend-dot legend-danger"></span>
+                                <div>
+                                    <strong>Abandono</strong>
+                                    <small>Animal deixado sozinho em local impróprio</small>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="legend-dot legend-warning"></span>
+                                <div>
+                                    <strong>Agressão / Maus-tratos</strong>
+                                    <small>Violência física ou negligência severa</small>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="legend-dot legend-info"></span>
+                                <div>
+                                    <strong>Sem água/comida</strong>
+                                    <small>Animal sem recursos básicos para sobreviver</small>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="legend-dot legend-default"></span>
+                                <div>
+                                    <strong>Outros</strong>
+                                    <small>Outras situações de risco</small>
+                                </div>
+                            </li>
+                        </ul>
+                    </aside>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-brand" data-reveal>
+                <div class="logo">
+                    <h1>VOZ ANIMAL</h1>
+                    <span>Denuncie, Proteja, Cuide</span>
+                </div>
+                <p class="footer-desc">Projeto desenvolvido para fins acadêmicos, focado em facilitar e agilizar o processo de denúncia contra maus-tratos aos animais.</p>
+            </div>
+            
+            <div class="footer-links" data-reveal>
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="doe.html">Doe</a></li>
+                    <li><a href="adote.html">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact" data-reveal>
+                <h4>Contato</h4>
+                <ul>
+                    <li>Email: gabrielle.oliveira8@aluno.cps.sp.gov.br</li>
+                    <li>Telefone: (11) 96306-1329</li>
+                    <li>Local: Itu - SP</li>
+                </ul>
+            </div>
+
+            <div class="footer-tcc" data-reveal>
+                <h4>Acadêmico</h4>
+                <p>Trabalho de Conclusão de Curso</p>
+                <p>Curso: Gestão de Tecnologia da Informação</p>
+                <p>Instituição: Fatec- Faculdade de Tecnologia Itu-SP</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 Voz Animal. Todos os direitos reservados. Projeto TCC.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Formulário de Denúncia (Overlay) -->
+    <section id="form-denuncia-overlay" class="form-overlay">
+        <div class="form-container">
+            <button class="close-btn">&times;</button>
+            <h2 class="form-title">REGISTRAR OCORRÊNCIA</h2>
+            <form id="denuncia-form">
+                <!-- Passo 1: Onde está o animal? -->
+                <div class="form-step active" data-step="1">
+                    <label for="endereco">Onde está o animal?</label>
+                    <input type="text" id="endereco" name="endereco" placeholder="Endereço Completo" required>
+                    <button type="button" class="btn-next">Próximo</button>
+                </div>
+
+                <!-- Passo 2: O que você presenciou? -->
+                <div class="form-step" data-step="2">
+                    <label>O que você presenciou?</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="presenciou" value="Abandono"> Abandono</label>
+                        <label><input type="checkbox" name="presenciou" value="Agressão física"> Agressão física</label>
+                        <label><input type="checkbox" name="presenciou" value="Sem água ou comida"> Sem água ou comida</label>
+                        <label><input type="checkbox" name="presenciou" value="Animal preso constantemente"> Animal preso constantemente</label>
+                        <label><input type="checkbox" name="presenciou" value="Negligência"> Negligência</label>
+                        <label><input type="checkbox" name="presenciou" value="Outro"> Outro</label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev">Voltar</button>
+                        <button type="button" class="btn-next">Próximo</button>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Descreva o que você viu -->
+                <div class="form-step" data-step="3">
+                    <label for="descricao">Descreva brevemente o que você viu:</label>
+                    <textarea id="descricao" name="descricao" placeholder="O cachorro está preso há dias sem água e aparenta estar muito magro..." rows="5" required></textarea>
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev">Voltar</button>
+                        <button type="button" class="btn-next">Próximo</button>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Identificação -->
+                <div class="form-step" data-step="4">
+                    <label>Você deseja se identificar?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="identificacao" value="anonima" checked> Denúncia anônima</label>
+                        <label><input type="radio" name="identificacao" value="identificar"> Quero me identificar</label>
+                    </div>
+                    <div id="identificacao-fields" style="display: none;">
+                        <input type="text" id="nome" name="nome" placeholder="Nome Completo">
+                        <input type="email" id="email" name="email" placeholder="Email">
+                        <input type="tel" id="telefone" name="telefone" placeholder="Telefone">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev">Voltar</button>
+                        <button type="button" class="btn-next">Próximo</button>
+                    </div>
+                </div>
+
+                <!-- Passo Final: Confirmação -->
+                <div class="form-step" data-step="5">
+                    <label class="checkbox-confirm">
+                        <input type="checkbox" id="confirmar-info" required> Declaro que todas as informações são verdadeiras
+                    </label>
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev">Voltar</button>
+                        <button type="submit" class="btn-submit">Gerar Boletim</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Tela de Revisão do Boletim (Oculta inicialmente) -->
+            <div id="boletim-revisao" style="display: none;">
+                <h3 class="form-title">REVISÃO DA DENÚNCIA</h3>
+                <div class="boletim-content" id="boletim-texto">
+                    <!-- O texto do boletim será inserido aqui via JS -->
+                </div>
+
+                <div class="encaminhar-section">
+                    <h4>Para onde encaminhar:</h4>
+                    <div class="contatos-encaminhamento">
+                        <article class="contato-card">
+                            <span class="contato-tipo">Canal institucional</span>
+                            <strong>Ministério Público do Estado de São Paulo</strong>
+                            <p>Promotoria de Justiça de Itu</p>
+                            <span class="contato-email">pjitu@mpsp.mp.br</span>
+                            <button type="button" class="btn-copy-email" data-email="pjitu@mpsp.mp.br">Copiar e-mail</button>
+                        </article>
+                        <article class="contato-card">
+                            <span class="contato-tipo">Orientação e apoio</span>
+                            <strong>ASPA Itu</strong>
+                            <p>Associação de Socorro e Proteção aos Animais de Itu</p>
+                            <span class="contato-email">ongaspaitu@outlook.com</span>
+                            <button type="button" class="btn-copy-email" data-email="ongaspaitu@outlook.com">Copiar e-mail</button>
+                        </article>
+                    </div>
+                    <p class="email-orientacao">
+                        Baixe o PDF da denúncia, copie o e-mail do destinatário desejado e encaminhe pelo seu próprio aplicativo ou site de e-mail. Anexe o PDF manualmente antes de enviar. O Voz Animal não envia o e-mail automaticamente.
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btn-editar-denuncia" class="btn-prev">Editar</button>
+                    <button type="button" id="btn-baixar-pdf" class="btn-submit">Baixar PDF</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="java.js"></script>
+</body>
+</html>

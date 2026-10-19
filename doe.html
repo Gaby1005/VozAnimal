@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title >Voz Animal - Denuncie Maus Tratos</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (opcional para ícones modernos) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1 href="index.html">VOZ ANIMAL</h1>
+                <span>Denuncie, Proteja, Cuide</span>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="doe.html" class="active">Doe</a></li>
+                    <li><a href="adote.html">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </nav>
+            <div class="header-action">
+                <a href="index.html#denuncia-section" class="btn-denuncie">DENUNCIE</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section Doação -->
+        <section class="hero hero-doe">
+            <div class="container">
+                <div class="hero-doe-wrapper">
+                    <div class="hero-doe-text" data-reveal>
+                        <h2 class="hero-title">Doe Amor,<br>Salve Vidas</h2>
+                        <p class="hero-subtitle">Cada doação transforma sofrimento em esperança.</p>
+                        <a href="#ongs-section" class="btn-primary btn-hero-doe">Fazer Doação</a>
+                    </div>
+                    <div class="hero-doe-image" data-reveal>
+                        <img src="img/imgDoe.jpg" alt="Cachorro sendo cuidado">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Motivação -->
+        <section class="motivation-section">
+            <div class="container">
+                <div class="motivation-content text-center" data-reveal>
+                    <h3 class="section-title">Um pequeno gesto pode salvar uma vida</h3>
+                    <p class="section-desc">Animais vítimas de maus-tratos precisam de cuidado, amor e apoio para recomeçar. Sua ajuda é o primeiro passo para uma nova história.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Histórias de Transformação -->
+        <section class="transformation-stories">
+            <div class="container">
+                <h3 class="section-title text-center" data-reveal>Histórias de transformação</h3>
+                
+                <div class="stories-grid-fixed">
+                    <!-- História 1 -->
+                    <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes01.jpeg" alt="Don Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois01.jpeg" alt="Don Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Don</h4>
+                            <p>Don era ainda filhote quando foi atropelado e passou dias na rua sem cuidado algum. Resgatado pelo Abrigo Animais Aumigos, ele foi adotado e hoje vive feliz e paparicado em sua nova casa.</p>
+                        </div>
+                    </div>
+                    <!-- História 2 -->
+                    <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes02.png" alt="Sardinha Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois02.png" alt="Sardinha Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Sardinha</h4>
+                            <p>O filhote Sardinha, de 4 meses, foi resgatado e se recuperou em poucos dias, após um tratamento para anemia e erliquiose, conhecida como doença do carrapato.</p>
+                        </div>
+                    </div>
+                    <!-- História 3 -->
+                    <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes03.png" alt="Theo Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois03.png" alt="Theo Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Theo</h4>
+                            <p>Resgatado com problema sério de pele, quase já sem pelo e o pouco que tinha estava embolado. Além disso, estava desnutrido, tinha anemia e doença do carrapato. Na segunda foto, ele aparece cheio de saúde e alegria após um bom banho, tosa, tratamento e uma dose extra de carinho. Está à espera de adoção no AdoteDog.</p>
+                        </div>
+                    </div>
+                    <!-- História 4 -->
+                    <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes04.png" alt="Guerreiro Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois04.png" alt="Guerreiro Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Guerreiro</h4>
+                            <p>O gatinho Guerreiro foi encontrado com a pata necrosada, que precisou ser amputada, passou dias se recuperando em uma clínica veterinária, até finalmente ser adotado.</p>
+                        </div>
+                    </div>
+                            
+                    <!-- História 5 -->
+                     <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes05.png" alt="Margarida Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois05.png" alt="Margarida Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Margarida</h4>
+                            <p>Margarida nasceu em um abrigo que não tinha condições de alimentar seus animais resgatados. Por conta de um problema sério de desnutrição, sua coordenação motora não se desenvolveu adequadamente. Quando foi resgatada, ela mal conseguia andar. Foram longos 14 meses de tratamento e três cirurgias para ela se recuperar. Foi adotada e vive feliz com sua família.</p>
+                        </div>
+                    </div>
+                    <!-- História 6 -->
+                    <div class="story-card-modern" data-reveal>
+                        <div class="story-images sensitive-content">
+                            <div class="sensitive-overlay">
+                                <i data-lucide="eye-off"></i>
+                                <span>Conteúdo Sensível</span>
+                                <p>Esta galeria contém imagens de resgate que podem ser fortes.</p>
+                                <button class="btn-reveal-images">Ver Imagens</button>
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-before">Antes</span>
+                                <img src="img/imgAntes06.png" alt="Pelado Antes">
+                            </div>
+                            <div class="image-box">
+                                <span class="badge badge-after">Depois</span>
+                                <img src="img/imgDepois06.png" alt="Pelado Depois">
+                            </div>
+                        </div>
+                        <div class="story-info">
+                            <h4>Pelado</h4>
+                            <p>Um cão encontrado praticamente sem pelo, triste e com uma infecção gravíssima. A segunda foto foi feita 40 dias após o resgate. Pelado foi adotado e vive rodeado de carinho.</p>
+                        </div>
+                    </div>  
+        </section>
+
+        <!-- ONGs Itu -->
+        <section id="ongs-section" class="ongs-section">
+            <div class="container">
+                <h3 class="section-title text-center" data-reveal>ONGs que resgatam e cuidam em Itu</h3>
+                <div class="ongs-grid">
+                    <!-- ONG 1 -->
+                    <div class="ong-card" data-reveal>
+                        <div class="ong-logo-box">
+                            <img src="img/logoAspa.png" alt="Logo ASPA Itu">
+                        </div>
+                        <div class="ong-details">
+                            <h4>ASPA Itu</h4>
+                            <p>Associação de Socorro e Proteção aos Animais de Itu. Atuando há anos na proteção animal.</p>
+                            <a href="https://wa.me/5511991728162" target="_blank" class="btn-ong-donate">
+                                <i data-lucide="heart"></i> Doar via WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                    <!-- ONG 2 -->
+                    <div class="ong-card" data-reveal>
+                        <div class="ong-logo-box">
+                            <img src="img/logoMonkey.png" alt="Logo ONG Monkey">
+                        </div>
+                        <div class="ong-details">
+                            <h4>ONG MUnkey</h4>
+                            <p>Dedicada ao resgate e reabilitação de animais em Itu, focando em casos críticos e abandono.</p>
+                            <a href="https://wa.me/5511940122491" target="_blank" class="btn-ong-donate">
+                                <i data-lucide="heart"></i> Doar via WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                     <!-- ONG 3 -->
+                    <div class="ong-card" data-reveal>
+                        <div class="ong-logo-box">
+                            <img src="img/logoMiadosQueSalvam.jpg" alt="Logo ONG Miados que salvam">
+                        </div>
+                        <div class="ong-details">
+                            <h4> Miados que salvam</h4>
+                            <p>ONG voltada para a proteção e adoções de gatos em situações de abandono, promovendo resgate, acolhimento e adoção responsável.</p>
+                            <a href="https://wa.me/5511933833640" target="_blank" class="btn-ong-donate">
+                                <i data-lucide="heart"></i> Doar via WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>      
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-brand" data-reveal>
+                <div class="logo">
+                    <h1>VOZ ANIMAL</h1>
+                    <span>Denuncie, Proteja, Cuide</span>
+                </div>
+                <p class="footer-desc">Projeto desenvolvido para fins acadêmicos, focado em facilitar e agilizar o processo de denúncia contra maus-tratos aos animais.</p>
+            </div>
+            
+            <div class="footer-links" data-reveal>
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="doe.html">Doe</a></li>
+                    <li><a href="adote.html">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact" data-reveal>
+                <h4>Contato</h4>
+                <ul>
+                    <li>Email: gabrielle.oliveira8@aluno.cps.sp.gov.br</li>
+                    <li>Telefone: (11) 96306-1329</li>
+                    <li>Local: Itu - SP</li>
+                </ul>
+            </div>
+
+            <div class="footer-tcc" data-reveal>
+                <h4>Acadêmico</h4>
+                <p>Trabalho de Conclusão de Curso</p>
+                <p>Curso: Gestão de Tecnologia da Informação</p>
+                <p>Instituição: Fatec- Faculdade de Tecnologia Itu-SP</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 Voz Animal. Todos os direitos reservados. Projeto TCC.</p>
+            </div>
+        </div>
+    </footer>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+        <script src="supabase-config.js"></script>
+        <script src="java.js"></script>
+    </body>
+    </html>

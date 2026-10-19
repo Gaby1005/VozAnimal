@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voz Animal - Denuncie Maus Tratos</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (opcional para ícones modernos) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container header-content">
+            <div class="logo">
+                <h1 href="index.html">VOZ ANIMAL</h1>
+                <span>Denuncie, Proteja, Cuide</span>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="doe.html">Doe</a></li>
+                    <li><a href="adote.html" class="active">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </nav>
+            <div class="header-action">
+                <a href="index.html#denuncia-section" class="btn-denuncie">DENUNCIE</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section Adote -->
+        <section class="hero-adote">
+            <div class="container">
+                <div class="hero-adote-content" data-reveal>
+                    <h2 class="hero-title">ENCONTRE UM LOCAL PARA ADOTAR</h2>
+                    <p class="hero-subtitle">Descubra ONGs, abrigos e centros de adoção perto de você</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cards de ONGs -->
+        <section class="adote-locais">
+            <div class="container">
+                <div class="locais-grid">
+                    <!-- ONG 1 -->
+                    <div class="local-card" data-reveal>
+                        <h3>ASPA ITU</h3>
+                        <div class="local-info">
+                            <p><strong>Tipo:</strong> ONG</p>
+                            <p><strong>Cidade:</strong> Itu</p>
+                            <p><strong>Endereço:</strong>Solicitamento por telefone para evitar o alto abandono de animais no local</p>
+                            <p><strong>Contato:</strong> (11) 99172-8162</p>
+                        </div>
+                        <a href="https://wa.me/5511991728162" target="_blank" class="btn-contato">entrar em contato</a>
+                    </div>
+
+                    <!-- ONG 2 -->
+                    <div class="local-card" data-reveal>
+                        <h3>MIADOS QUE SALVAM</h3>
+                        <div class="local-info">
+                            <p><strong>Tipo:</strong> ONG</p>
+                            <p><strong>Cidade:</strong> Itu</p>
+                            <p><strong>Endereço:</strong>Solicitamento por telefone para evitar o alto abandono de animais no local</p>
+                            <p><strong>Contato:</strong> (11) 93383-3640</p>
+                        </div>
+                        <a href="https://wa.me/5511933833640" target="_blank" class="btn-contato">entrar em contato</a>
+                    </div>
+
+                    <!-- ONG 3 -->
+                    <div class="local-card" data-reveal>
+                        <h3>ZOONOSE DE ITU</h3>
+                        <div class="local-info">
+                            <p><strong>Tipo:</strong> Orgão Público</p>
+                            <p><strong>Cidade:</strong> Itu</p>
+                            <p><strong>Endereço:</strong> Av. Sete Quedas, 1038 — Vila Progresso, Itu/SP</p>
+                            <p><strong>Contato:</strong> (11) 93231-9925</p>
+                        </div>
+                        <a href="https://wa.me/5511932319925" target="_blank" class="btn-contato">entrar em contato</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção do Mapa -->
+        <section class="mapa-section" data-reveal>
+            <div class="container">
+                <h3 class="section-title text-center">Localização das ONGs em Itu</h3>
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d117183.3682705141!2d-47.37523297120603!3d-23.279815041076294!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1songs%20de%20animais%20em%20itu%20sp!5e0!3m2!1spt-BR!2sbr!4v1709123456789!5m2!1spt-BR!2sbr" 
+                        width="100%" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container footer-content">
+            <div class="footer-brand" data-reveal>
+                <div class="logo">
+                    <h1>VOZ ANIMAL</h1>
+                    <span>Denuncie, Proteja, Cuide</span>
+                </div>
+                <p class="footer-desc">Projeto desenvolvido para fins acadêmicos, focado em facilitar e agilizar o processo de denúncia contra maus-tratos aos animais.</p>
+            </div>
+            
+            <div class="footer-links" data-reveal>
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="doe.html">Doe</a></li>
+                    <li><a href="adote.html">Adote</a></li>
+                    <li><a href="sobre.html">Sobre</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact" data-reveal>
+                <h4>Contato</h4>
+                <ul>
+                    <li>Email: gabrielle.oliveira8@aluno.cps.sp.gov.br</li>
+                    <li>Telefone: (11) 96306-1329</li>
+                    <li>Local: Itu - SP</li>
+                </ul>
+            </div>
+
+            <div class="footer-tcc" data-reveal>
+                <h4>Acadêmico</h4>
+                <p>Trabalho de Conclusão de Curso</p>
+                <p>Curso: Gestão de Tecnologia da Informação</p>
+                <p>Instituição: Fatec- Faculdade de Tecnologia Itu-SP</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 Voz Animal. Todos os direitos reservados. Projeto TCC.</p>
+            </div>
+        </div>
+    </footer>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+        <script src="supabase-config.js"></script>
+        <script src="java.js"></script>
+    </body>
+    </html>
