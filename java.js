@@ -756,7 +756,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const denunciasRenderizadas = [];
         const idsRenderizados = new Set();
         const denunciasIndicadores = denunciasDb ? [...denunciasDb] : [];
-        const indicadorStatus = document.getElementById('indicadores-status');
         const indicadorTotal = document.getElementById('stat-total-denuncias');
         const indicadorAbandono = document.getElementById('stat-abandono');
         const indicadorAgressao = document.getElementById('stat-agressao');
@@ -797,7 +796,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 [indicadorTotal, indicadorAbandono, indicadorAgressao, indicadorNegligencia, indicadorOutros].forEach(elemento => {
                     if (elemento) elemento.textContent = '--';
                 });
-                if (indicadorStatus) indicadorStatus.textContent = 'Indicadores indisponíveis no momento. Não foi possível consultar o Supabase.';
                 return;
             }
 
@@ -808,7 +806,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (indicadorAgressao) indicadorAgressao.textContent = estatisticas.agressao;
             if (indicadorNegligencia) indicadorNegligencia.textContent = estatisticas.negligencia;
             if (indicadorOutros) indicadorOutros.textContent = estatisticas.outros;
-            if (indicadorStatus) indicadorStatus.textContent = 'Contagem calculada a partir dos registros reais salvos no Supabase.';
         }
 
         function adicionarDenunciaAoMapa(denuncia) {
