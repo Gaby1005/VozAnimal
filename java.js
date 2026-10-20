@@ -156,6 +156,35 @@ async function copiarTextoParaAreaTransferencia(texto) {
 const header = document.getElementById('main-header');
 const sections = document.querySelectorAll('section');
 const navLinks = document.querySelectorAll('.nav-menu a');
+const menuToggle = document.querySelector('.menu-toggle');
+const navMenu = document.querySelector('.nav-menu');
+
+function fecharMenuMobile() {
+    if (!menuToggle || !navMenu) return;
+    menuToggle.classList.remove('active');
+    navMenu.classList.remove('active');
+    document.body.classList.remove('menu-open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    menuToggle.setAttribute('aria-label', 'Abrir menu');
+}
+
+if (menuToggle && navMenu) {
+    menuToggle.addEventListener('click', () => {
+        const menuAberto = navMenu.classList.toggle('active');
+        menuToggle.classList.toggle('active', menuAberto);
+        document.body.classList.toggle('menu-open', menuAberto);
+        menuToggle.setAttribute('aria-expanded', String(menuAberto));
+        menuToggle.setAttribute('aria-label', menuAberto ? 'Fechar menu' : 'Abrir menu');
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', fecharMenuMobile);
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) fecharMenuMobile();
+    });
+}
 
 // Lógica de Revelação ao Rolar (Intersection Observer)
 const revealElements = document.querySelectorAll('[data-reveal]');
@@ -170,6 +199,7 @@ const revealObserver = new IntersectionObserver((entries) => {
 revealElements.forEach(el => revealObserver.observe(el));
 
 window.addEventListener('scroll', () => {
+    if (!header) return;
     // Header Color Change
     if (window.scrollY > 50) {
         header.classList.add('scrolled');
