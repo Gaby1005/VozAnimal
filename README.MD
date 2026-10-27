@@ -36,10 +36,10 @@ Desenvolver uma plataforma que simplifique o processo de registro de denúncias,
 O sistema poderá ser acessado pelo navegador após sua publicação em uma plataforma de hospedagem web.
 
 **Repositório do projeto:**  
-[Insira aqui o link do repositório no GitHub]
+(https://github.com/Gaby1005/VozAnimal)
 
 **Acesso ao sistema:**  
-[Insira aqui o link do site publicado]
+(https://gaby1005.github.io/VozAnimal/)
 
 ## 🧪 Como executar localmente
 

@@ -119,6 +119,10 @@ async function geocodificarEndereco(endereco) {
 }
 
 function obterMensagemErroDenuncia(error) {
+    if (error?.name === 'TypeError' || String(error?.message || '').includes('Failed to fetch')) {
+        return 'Não foi possível conectar ao Supabase. Verifique se a URL do projeto e a chave pública estão corretas.';
+    }
+
     if (error?.code === 'PGRST202' || String(error?.message || '').includes('criar_denuncia')) {
         return 'A função criar_denuncia ainda não existe ou o cache do Supabase não foi atualizado. Execute a migration 002_fix_criar_denuncia_rpc.sql no SQL Editor do Supabase.';
     }
@@ -128,6 +132,16 @@ function obterMensagemErroDenuncia(error) {
     }
 
     return error?.message || 'erro desconhecido';
+}
+
+function registrarErroSupabase(contexto, error) {
+    console.warn(contexto, {
+        code: error?.code,
+        name: error?.name,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint
+    });
 }
 
 async function copiarTextoParaAreaTransferencia(texto) {
@@ -655,25 +669,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
 
         let supabaseLoadError = null;
-        const denunciasDb = await (async () => {
+        let supabaseLoadSource = null;
+
+        async function buscarDenunciasDoSupabase() {
             if (!supabaseClient) return null;
-            const { data, error } = await supabaseClient
-                .from('denuncias_mapa')
-                .select('id, data_registro, tipo, bairro, status, latitude_publica, longitude_publica')
-                .order('data_registro', { ascending: false })
-                .limit(500);
-            if (error) {
+
+            try {
+                const consultaMapa = await supabaseClient
+                    .from('denuncias_mapa')
+                    .select('id, data_registro, tipo, bairro, status, latitude_publica, longitude_publica')
+                    .order('data_registro', { ascending: false })
+                    .limit(500);
+
+                if (!consultaMapa.error) {
+                    supabaseLoadSource = 'denuncias_mapa';
+                    return (consultaMapa.data || []).map(formatarDenunciaParaMapa);
+                }
+
+                registrarErroSupabase('Falha ao carregar a view pública denuncias_mapa:', consultaMapa.error);
+
+                const consultaTabela = await supabaseClient
+                    .from('denuncias')
+                    .select('id, data_registro, created_at, tipo, bairro, status, latitude_publica, longitude_publica, latitude, longitude')
+                    .order('data_registro', { ascending: false, nullsFirst: false })
+                    .limit(500);
+
+                if (!consultaTabela.error) {
+                    supabaseLoadSource = 'denuncias';
+                    return (consultaTabela.data || []).map(formatarDenunciaParaMapa);
+                }
+
+                registrarErroSupabase('Falha ao carregar a tabela denuncias com campos atuais:', consultaTabela.error);
+
+                const consultaTabelaLegada = await supabaseClient
+                    .from('denuncias')
+                    .select('id, created_at, tipo, latitude, longitude')
+                    .order('created_at', { ascending: false })
+                    .limit(500);
+
+                if (!consultaTabelaLegada.error) {
+                    supabaseLoadSource = 'denuncias';
+                    return (consultaTabelaLegada.data || []).map(formatarDenunciaParaMapa);
+                }
+
+                supabaseLoadError = consultaTabelaLegada.error || consultaTabela.error || consultaMapa.error;
+                registrarErroSupabase('Falha ao carregar a tabela denuncias com campos legados:', supabaseLoadError);
+            } catch (error) {
                 supabaseLoadError = error;
-                return null;
+                registrarErroSupabase('Erro de rede ao carregar denúncias do Supabase:', error);
             }
-            if (!data) return null;
-            return data.map(formatarDenunciaParaMapa);
-        })();
+
+            return null;
+        }
+
+        const denunciasDb = await buscarDenunciasDoSupabase();
 
         if (supabaseLoadError) {
-            console.warn('Falha ao carregar denúncias do Supabase:', supabaseLoadError);
+            registrarErroSupabase('Falha ao carregar denúncias do Supabase:', supabaseLoadError);
         } else if (supabaseClient && denunciasDb && denunciasDb.length === 0) {
-            console.info('Nenhuma denúncia encontrada no Supabase. Usando dados de exemplo.');
+            console.info(`Nenhuma denúncia encontrada no Supabase pela fonte ${supabaseLoadSource || 'indefinida'}.`);
+        } else if (supabaseClient && denunciasDb) {
+            console.info(`Denúncias carregadas do Supabase pela fonte ${supabaseLoadSource}: ${denunciasDb.length}.`);
         }
 
         const denuncias = denunciasDb || (!supabaseClient ? denunciasMock : []);
@@ -791,6 +847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const indicadorAgressao = document.getElementById('stat-agressao');
         const indicadorNegligencia = document.getElementById('stat-negligencia');
         const indicadorOutros = document.getElementById('stat-outros');
+        const indicadorFeedback = document.getElementById('indicadores-feedback');
 
         function calcularIndicadoresDenuncias(denunciasParaContar) {
             const idsUnicos = new Set();
@@ -826,6 +883,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 [indicadorTotal, indicadorAbandono, indicadorAgressao, indicadorNegligencia, indicadorOutros].forEach(elemento => {
                     if (elemento) elemento.textContent = '--';
                 });
+                if (indicadorFeedback) {
+                    indicadorFeedback.textContent = supabaseClient
+                        ? obterMensagemErroDenuncia(supabaseLoadError)
+                        : 'A configuração do Supabase está ausente ou inválida.';
+                }
                 return;
             }
 
@@ -836,6 +898,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (indicadorAgressao) indicadorAgressao.textContent = estatisticas.agressao;
             if (indicadorNegligencia) indicadorNegligencia.textContent = estatisticas.negligencia;
             if (indicadorOutros) indicadorOutros.textContent = estatisticas.outros;
+            if (indicadorFeedback) {
+                indicadorFeedback.textContent = estatisticas.total === 0
+                    ? 'Nenhuma denúncia encontrada no banco de dados conectado.'
+                    : '';
+            }
         }
 
         function adicionarDenunciaAoMapa(denuncia) {
