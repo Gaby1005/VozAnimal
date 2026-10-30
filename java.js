@@ -12,7 +12,14 @@ const supabaseClient =
 
 const ITU_LAT = -23.2637;
 const ITU_LON = -47.2995;
-const NOME_ARQUIVO_BOLETIM = 'boletim-de-ocorrencia-voz-animal.pdf';
+const NOME_ARQUIVO_BOLETIM = 'relatorio-noticia-crime-voz-animal.pdf';
+const BUCKET_FOTOS_DENUNCIA = 'denuncia-fotos';
+const LIMITE_FOTOS_DENUNCIA = 5;
+const TAMANHO_MAXIMO_FOTO = 10 * 1024 * 1024;
+const TIPOS_FOTO_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
+
+let fotosSelecionadasDenuncia = [];
+let denunciaRegistradaAtual = null;
 
 function formatarDenunciaParaMapa(denuncia) {
     return {
@@ -142,6 +149,290 @@ function registrarErroSupabase(contexto, error) {
         details: error?.details,
         hint: error?.hint
     });
+}
+
+function formatarTamanhoArquivo(bytes) {
+    if (!Number.isFinite(bytes)) return 'tamanho desconhecido';
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(mb >= 10 ? 0 : 1)} MB`;
+}
+
+function obterExtensaoFoto(file) {
+    const nome = file.name || '';
+    const extensaoNome = nome.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(extensaoNome)) return extensaoNome;
+    if (file.type === 'image/png') return 'png';
+    if (file.type === 'image/webp') return 'webp';
+    return 'jpg';
+}
+
+function limparNomeArquivo(nome) {
+    return String(nome || 'foto')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 80) || 'foto';
+}
+
+function gerarIdentificadorArquivo() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function atualizarFeedbackFotos(mensagem, tipo = 'info') {
+    const feedback = document.getElementById('fotos-feedback');
+    if (!feedback) return;
+    feedback.textContent = mensagem || '';
+    feedback.dataset.tipo = tipo;
+}
+
+function atualizarPreviewFotos() {
+    const preview = document.getElementById('fotos-preview');
+    if (!preview) return;
+
+    preview.innerHTML = '';
+
+    fotosSelecionadasDenuncia.forEach((item, index) => {
+        const card = document.createElement('article');
+        card.className = 'foto-preview-card';
+
+        const img = document.createElement('img');
+        img.src = item.previewUrl;
+        img.alt = `Pré-visualização da fotografia ${String(index + 1).padStart(2, '0')}`;
+
+        const info = document.createElement('div');
+        info.innerHTML = `
+            <strong>Fotografia ${String(index + 1).padStart(2, '0')}</strong>
+            <span>${escaparHTML(item.file.name)}</span>
+            <small>${formatarTamanhoArquivo(item.file.size)}</small>
+        `;
+
+        const remover = document.createElement('button');
+        remover.type = 'button';
+        remover.className = 'btn-remover-foto';
+        remover.textContent = 'Remover';
+        remover.addEventListener('click', () => {
+            URL.revokeObjectURL(item.previewUrl);
+            fotosSelecionadasDenuncia.splice(index, 1);
+            atualizarPreviewFotos();
+            atualizarFeedbackFotos(
+                fotosSelecionadasDenuncia.length
+                    ? `${fotosSelecionadasDenuncia.length} fotografia(s) selecionada(s).`
+                    : ''
+            );
+        });
+
+        card.append(img, info, remover);
+        preview.appendChild(card);
+    });
+}
+
+function adicionarFotosSelecionadas(files) {
+    const erros = [];
+
+    Array.from(files || []).forEach(file => {
+        if (fotosSelecionadasDenuncia.length >= LIMITE_FOTOS_DENUNCIA) {
+            erros.push(`Limite de ${LIMITE_FOTOS_DENUNCIA} fotografias atingido.`);
+            return;
+        }
+
+        if (!TIPOS_FOTO_PERMITIDOS.includes(file.type)) {
+            erros.push(`${file.name}: formato não permitido. Use JPG, JPEG, PNG ou WEBP.`);
+            return;
+        }
+
+        if (file.size > TAMANHO_MAXIMO_FOTO) {
+            erros.push(`${file.name}: arquivo maior que 10 MB.`);
+            return;
+        }
+
+        fotosSelecionadasDenuncia.push({
+            file,
+            previewUrl: URL.createObjectURL(file)
+        });
+    });
+
+    atualizarPreviewFotos();
+
+    if (erros.length) {
+        atualizarFeedbackFotos(erros.join(' '), 'erro');
+    } else if (fotosSelecionadasDenuncia.length) {
+        atualizarFeedbackFotos(`${fotosSelecionadasDenuncia.length} fotografia(s) selecionada(s).`, 'sucesso');
+    } else {
+        atualizarFeedbackFotos('');
+    }
+}
+
+function resetarFotosSelecionadas() {
+    fotosSelecionadasDenuncia.forEach(item => URL.revokeObjectURL(item.previewUrl));
+    fotosSelecionadasDenuncia = [];
+    const inputFotos = document.getElementById('fotos-denuncia');
+    const progresso = document.getElementById('fotos-progresso');
+    if (inputFotos) inputFotos.value = '';
+    if (progresso) progresso.textContent = '';
+    atualizarFeedbackFotos('');
+    atualizarPreviewFotos();
+}
+
+async function lerArquivoComoDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error('Não foi possível ler a fotografia.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function prepararImagemParaPdf(file) {
+    const dataUrl = await lerArquivoComoDataURL(file);
+
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            const maxWidth = 1200;
+            const scale = Math.min(1, maxWidth / image.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(image.width * scale);
+            canvas.height = Math.round(image.height * scale);
+            const context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        image.onerror = () => reject(new Error(`Não foi possível preparar a fotografia ${file.name} para o PDF.`));
+        image.src = dataUrl;
+    });
+}
+
+async function enviarFotosDenuncia(denunciaId) {
+    if (!fotosSelecionadasDenuncia.length) return [];
+
+    const progresso = document.getElementById('fotos-progresso');
+    const registros = [];
+    const pathsEnviados = [];
+
+    for (let index = 0; index < fotosSelecionadasDenuncia.length; index++) {
+        const { file } = fotosSelecionadasDenuncia[index];
+        const ordem = index + 1;
+        const extensao = obterExtensaoFoto(file);
+        const nomeSeguro = limparNomeArquivo(file.name).replace(/\.[^.]+$/, '');
+        const storagePath = `${denunciaId}/${Date.now()}-${ordem}-${gerarIdentificadorArquivo()}.${extensao}`;
+
+        if (progresso) {
+            progresso.textContent = `Enviando fotografia ${ordem} de ${fotosSelecionadasDenuncia.length}...`;
+        }
+
+        const { error: uploadError } = await supabaseClient.storage
+            .from(BUCKET_FOTOS_DENUNCIA)
+            .upload(storagePath, file, {
+                contentType: file.type,
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (uploadError) {
+            throw uploadError;
+        }
+
+        pathsEnviados.push(storagePath);
+        registros.push({
+            denuncia_id: denunciaId,
+            storage_path: storagePath,
+            nome_original: file.name,
+            nome_exibicao: `${nomeSeguro || 'fotografia'}-${String(ordem).padStart(2, '0')}.${extensao}`,
+            mime_type: file.type,
+            tamanho_bytes: file.size,
+            ordem
+        });
+    }
+
+    const { error } = await supabaseClient
+        .from('denuncia_fotos')
+        .insert(registros);
+
+    if (error) {
+        await supabaseClient.storage.from(BUCKET_FOTOS_DENUNCIA).remove(pathsEnviados);
+        throw error;
+    }
+
+    if (progresso) progresso.textContent = 'Fotografias anexadas ao relatório.';
+    return registros;
+}
+
+function gerarTextoRelatorioDenuncia(dados) {
+    const identificacao = dados.isAnonimo
+        ? 'O denunciante optou por realizar a comunicação de forma anônima.'
+        : `Nome: ${dados.nome || 'Não informado'}\nE-mail: ${dados.email || 'Não informado'}\nTelefone: ${dados.telefone || 'Não informado'}`;
+
+    const fotosTexto = dados.fotos?.length
+        ? dados.fotos.map((foto, index) => `Fotografia ${String(index + 1).padStart(2, '0')}: ${foto.nome_original || foto.nome_exibicao || 'arquivo anexado'}`).join('\n')
+        : 'Não foram anexadas fotografias ao registro.';
+
+    return `VOZ ANIMAL
+
+RELATÓRIO DE COMUNICAÇÃO DE POSSÍVEL CRIME DE MAUS-TRATOS CONTRA ANIMAIS (NOTÍCIA-CRIME)
+
+Os dados e relatos registrados neste formulário serão compilados em documento próprio e apresentados às autoridades policiais competentes para apuração dos fatos.
+
+1. IDENTIFICAÇÃO DO REGISTRO
+Identificador do registro: ${dados.id || 'Não informado'}
+Data e horário do registro: ${dados.dataRegistro || 'Não informado'}
+
+2. TIPO DE OCORRÊNCIA
+${dados.tiposMarcados || dados.tipo || 'Não informado'}
+
+3. ENDEREÇO OU LOCALIZAÇÃO INFORMADA
+${dados.endereco || 'Não informado'}
+${dados.bairro ? `Bairro/região identificado(a): ${dados.bairro}` : ''}
+
+4. DESCRIÇÃO DETALHADA DOS FATOS RELATADOS
+${dados.relato || 'Não informado'}
+
+5. IDENTIFICAÇÃO DO DENUNCIANTE
+${identificacao}
+
+6. INFORMAÇÃO SOBRE ANONIMATO
+${dados.isAnonimo ? 'Comunicação registrada como anônima.' : 'Comunicação registrada com identificação voluntária do denunciante.'}
+
+7. ANEXOS — REGISTROS FOTOGRÁFICOS
+${fotosTexto}
+
+8. OBSERVAÇÕES COMPLEMENTARES
+As informações foram fornecidas voluntariamente pelo usuário do sistema Voz Animal. A possível prática de maus-tratos contra animais é tratada no artigo 32 da Lei nº 9.605/1998.
+
+DECLARAÇÃO FINAL
+Este documento constitui um relatório particular de comunicação de possível crime, elaborado a partir das informações voluntariamente fornecidas pelo denunciante. Não possui natureza de Boletim de Ocorrência oficial e não substitui o registro formal perante os órgãos competentes. Seu objetivo é reunir informações e eventuais elementos de prova para subsidiar a comunicação dos fatos às autoridades responsáveis pela análise e eventual apuração.`;
+}
+
+function atualizarRevisaoFotos(fotos) {
+    const container = document.getElementById('fotos-anexadas-revisao');
+    const btnBaixarFotos = document.getElementById('btn-baixar-fotos');
+    if (!container) return;
+
+    if (!fotosSelecionadasDenuncia.length) {
+        container.innerHTML = '<p class="fotos-sem-anexo">Nenhuma fotografia foi anexada a este relatório.</p>';
+        if (btnBaixarFotos) btnBaixarFotos.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = `
+        <h4>Anexos — registros fotográficos</h4>
+        <div class="fotos-preview fotos-preview-revisao">
+            ${fotosSelecionadasDenuncia.map((item, index) => `
+                <article class="foto-preview-card">
+                    <img src="${item.previewUrl}" alt="Fotografia ${String(index + 1).padStart(2, '0')} anexada">
+                    <div>
+                        <strong>Fotografia ${String(index + 1).padStart(2, '0')}</strong>
+                        <span>${escaparHTML(fotos?.[index]?.nome_original || item.file.name)}</span>
+                        <small>${formatarTamanhoArquivo(item.file.size)}</small>
+                    </div>
+                </article>
+            `).join('')}
+        </div>
+    `;
+
+    if (btnBaixarFotos) btnBaixarFotos.style.display = '';
 }
 
 async function copiarTextoParaAreaTransferencia(texto) {
@@ -277,6 +568,7 @@ const btnPrev = document.querySelectorAll('.btn-prev');
 const identificacaoRadios = document.querySelectorAll('input[name="identificacao"]');
 const identificacaoFields = document.getElementById('identificacao-fields');
 const formDenuncia = document.getElementById('denuncia-form');
+const inputFotosDenuncia = document.getElementById('fotos-denuncia');
 
 let currentStep = 0;
 
@@ -309,6 +601,8 @@ if (btnAbrirForm) {
             currentStep = 0;
             showStep(currentStep);
             updateIdentificacaoFields();
+            resetarFotosSelecionadas();
+            denunciaRegistradaAtual = null;
             if (formDenuncia) formDenuncia.style.display = 'block';
             const boletimRevisao = document.getElementById('boletim-revisao');
             if (boletimRevisao) boletimRevisao.style.display = 'none';
@@ -323,6 +617,8 @@ if (btnFecharForm) {
             denunciaOverlay.classList.remove('active');
             document.body.style.overflow = ''; // Restaura o scroll do fundo
             if (formDenuncia) formDenuncia.reset();
+            resetarFotosSelecionadas();
+            denunciaRegistradaAtual = null;
             if (formDenuncia) formDenuncia.style.display = 'block';
             const boletimRevisao = document.getElementById('boletim-revisao');
             if (boletimRevisao) boletimRevisao.style.display = 'none';
@@ -387,6 +683,13 @@ if (identificacaoRadios) {
     });
 }
 
+if (inputFotosDenuncia) {
+    inputFotosDenuncia.addEventListener('change', event => {
+        adicionarFotosSelecionadas(event.target.files);
+        event.target.value = '';
+    });
+}
+
 // Submissão do formulário
 if (formDenuncia) {
     formDenuncia.addEventListener('submit', async (e) => {
@@ -406,64 +709,16 @@ if (formDenuncia) {
         const tiposMarcados = tiposArray.join(' / ');
         const relato = document.getElementById('descricao').value;
         const isAnonimo = document.querySelector('input[name="identificacao"]:checked').value === 'anonima';
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-        
-        let textoBoletim = "";
+        const nome = isAnonimo ? null : document.getElementById('nome').value;
+        const email = isAnonimo ? null : document.getElementById('email').value;
+        const telefone = isAnonimo ? null : document.getElementById('telefone').value;
 
-        if (isAnonimo) {
-            textoBoletim = `À Autoridade Competente,
-
-Venho por meio deste registrar denúncia de possível prática de maus-tratos a animal, conforme previsto no artigo 32 da Lei nº 9.605/1998 (Lei de Crimes Ambientais).
-
-A ocorrência foi constatada no endereço ${endereco}.
-
-De acordo com o observado, trata-se de situação caracterizada como:
-${tiposMarcados}
-
-Descrição dos fatos:
-${relato}
-
-Diante dos fatos relatados, solicita-se a apuração da situação e a adoção das medidas legais cabíveis para averiguação e eventual responsabilização dos envolvidos.
-
-Esta denúncia é realizada de forma anônima, com o objetivo exclusivo de preservar a integridade do(s) animal(is) envolvido(s).
-
-Declara-se que as informações aqui registradas são verdadeiras, sob pena de responsabilidade legal.
-
-Data do registro: ${dataAtual}`;
-        } else {
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const telefone = document.getElementById('telefone').value;
-
-            textoBoletim = `À Autoridade Competente,
-
-Eu, ${nome}, venho por meio deste formalizar denúncia de possível prática de maus-tratos a animal, nos termos do artigo 32 da Lei nº 9.605/1998 (Lei de Crimes Ambientais).
-
-A ocorrência foi constatada no endereço ${endereco}.
-
-Conforme observado, a situação envolve:
-${tiposMarcados}
-
-Descrição dos fatos:
-${relato}
-
-Diante da gravidade da situação relatada, requer-se a apuração dos fatos e a adoção das providências legais cabíveis.
-
-Declaro que as informações prestadas são verdadeiras e estou ciente das responsabilidades legais decorrentes de eventual denúncia falsa.
-
-Contato para esclarecimentos:
-E-mail: ${email}
-Telefone: ${telefone}
-Data do registro: ${dataAtual}`;
-        }
-
-        // Prepara o boletim; a troca de tela acontece depois que o banco confirmar.
+        // Prepara a revisão; a troca de tela acontece depois que banco e fotos confirmarem.
         const boletimTexto = document.getElementById('boletim-texto');
         const boletimRevisao = document.getElementById('boletim-revisao');
-        
-        if (boletimTexto) boletimTexto.innerText = textoBoletim;
 
         const tipoParaMapa = normalizarTipoParaMapa(tiposArray);
+        let registroPrincipalCriado = false;
 
         try {
             if (!supabaseClient) {
@@ -479,9 +734,9 @@ Data do registro: ${dataAtual}`;
                     p_tipos: tiposMarcados,
                     p_descricao: relato,
                     p_is_anonimo: isAnonimo,
-                    p_nome: isAnonimo ? null : document.getElementById('nome').value,
-                    p_email: isAnonimo ? null : document.getElementById('email').value,
-                    p_telefone: isAnonimo ? null : document.getElementById('telefone').value,
+                    p_nome: nome,
+                    p_email: email,
+                    p_telefone: telefone,
                     p_latitude: geo.latitude,
                     p_longitude: geo.longitude,
                     p_bairro: geo.bairro
@@ -490,7 +745,33 @@ Data do registro: ${dataAtual}`;
             if (error) throw error;
 
             const denunciaPublica = Array.isArray(denunciaSalva) ? denunciaSalva[0] : denunciaSalva;
+            registroPrincipalCriado = true;
             const denunciaMapa = formatarDenunciaParaMapa(denunciaPublica);
+            const fotosEnviadas = await enviarFotosDenuncia(denunciaPublica.id);
+            const dataRegistroRelatorio = denunciaPublica.data_registro
+                ? new Date(denunciaPublica.data_registro).toLocaleString('pt-BR')
+                : new Date().toLocaleString('pt-BR');
+
+            denunciaRegistradaAtual = {
+                id: denunciaPublica.id,
+                dataRegistro: dataRegistroRelatorio,
+                tipo: tipoParaMapa,
+                tiposMarcados,
+                endereco,
+                bairro: denunciaPublica.bairro || geo.bairro,
+                relato,
+                isAnonimo,
+                nome,
+                email,
+                telefone,
+                fotos: fotosEnviadas
+            };
+
+            if (boletimTexto) {
+                boletimTexto.innerText = gerarTextoRelatorioDenuncia(denunciaRegistradaAtual);
+            }
+
+            atualizarRevisaoFotos(fotosEnviadas);
 
             if (window.__vozAnimalMapa?.adicionarDenuncia) {
                 window.__vozAnimalMapa.adicionarDenuncia(denunciaMapa);
@@ -499,15 +780,27 @@ Data do registro: ${dataAtual}`;
             if (boletimRevisao) boletimRevisao.style.display = 'block';
             formDenuncia.style.display = 'none';
 
-            alert('Denúncia registrada no banco de dados e adicionada ao mapa. O boletim já está disponível para baixar ou encaminhar.');
+            alert(`Seu relato foi registrado com sucesso!
+
+As informações fornecidas foram organizadas em um Relatório de Comunicação de Possível Crime (Notícia-Crime).
+
+Você poderá baixar o documento e encaminhá-lo às autoridades competentes para conhecimento e análise dos fatos.
+
+Lembre-se: este relatório não substitui um Boletim de Ocorrência oficial.`);
         } catch (error) {
             console.error('Erro ao registrar denúncia:', error);
-            alert(`Não foi possível registrar a denúncia no banco de dados. Detalhes: ${obterMensagemErroDenuncia(error)}`);
+            if (registroPrincipalCriado) {
+                alert(`O relato principal foi salvo, mas não foi possível anexar as fotografias. Detalhes: ${obterMensagemErroDenuncia(error)}
+
+Verifique a configuração do bucket denuncia-fotos no Supabase e tente novamente. Para evitar duplicidade, confira o painel do Supabase antes de reenviar o formulário.`);
+            } else {
+                alert(`Não foi possível registrar a denúncia no banco de dados. Detalhes: ${obterMensagemErroDenuncia(error)}`);
+            }
         } finally {
             formDenuncia.dataset.submitting = 'false';
             if (submitButton) {
                 submitButton.disabled = false;
-                submitButton.textContent = 'Gerar Boletim';
+                submitButton.textContent = 'Gerar relatório';
             }
         }
     });
@@ -526,7 +819,7 @@ if (btnEditarDenuncia) {
 // Botão Baixar PDF
 const btnBaixarPdf = document.getElementById('btn-baixar-pdf');
 if (btnBaixarPdf) {
-    btnBaixarPdf.addEventListener('click', () => {
+    btnBaixarPdf.addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
@@ -534,23 +827,81 @@ if (btnBaixarPdf) {
         if (!boletimTexto) return;
         
         const textoBoletim = boletimTexto.innerText;
-        
-        // Configurações do PDF
         const margin = 20;
         const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
         const maxLineWidth = pageWidth - (margin * 2);
+        let cursorY = margin;
         
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
         
-        // Divide o texto em linhas para caber na página
         const lines = doc.splitTextToSize(textoBoletim, maxLineWidth);
-        
-        // Adiciona o texto ao documento
-        doc.text(lines, margin, margin + 10);
-        
-        // Download do arquivo
+        lines.forEach(line => {
+            if (cursorY > pageHeight - margin) {
+                doc.addPage();
+                cursorY = margin;
+            }
+            doc.text(line, margin, cursorY);
+            cursorY += 7;
+        });
+
+        if (fotosSelecionadasDenuncia.length) {
+            doc.addPage();
+            cursorY = margin;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text('ANEXOS — REGISTROS FOTOGRÁFICOS', margin, cursorY);
+            cursorY += 12;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+
+            for (let index = 0; index < fotosSelecionadasDenuncia.length; index++) {
+                const { file } = fotosSelecionadasDenuncia[index];
+                try {
+                    const dataUrl = await prepararImagemParaPdf(file);
+                    const props = doc.getImageProperties(dataUrl);
+                    const imageWidth = maxLineWidth;
+                    const imageHeight = Math.min((props.height * imageWidth) / props.width, 120);
+
+                    if (cursorY + imageHeight + 18 > pageHeight - margin) {
+                        doc.addPage();
+                        cursorY = margin;
+                    }
+
+                    doc.text(`Fotografia ${String(index + 1).padStart(2, '0')} - ${file.name}`, margin, cursorY);
+                    cursorY += 6;
+                    doc.addImage(dataUrl, 'JPEG', margin, cursorY, imageWidth, imageHeight);
+                    cursorY += imageHeight + 12;
+                } catch (error) {
+                    console.warn('Não foi possível inserir fotografia no PDF:', {
+                        name: file.name,
+                        message: error?.message
+                    });
+                }
+            }
+        }
+
         doc.save(NOME_ARQUIVO_BOLETIM);
+    });
+}
+        
+const btnBaixarFotos = document.getElementById('btn-baixar-fotos');
+if (btnBaixarFotos) {
+    btnBaixarFotos.addEventListener('click', () => {
+        if (!fotosSelecionadasDenuncia.length) {
+            alert('Nenhuma fotografia foi anexada a este relatório.');
+            return;
+        }
+        
+        fotosSelecionadasDenuncia.forEach((item, index) => {
+            const link = document.createElement('a');
+            link.href = item.previewUrl;
+            link.download = `foto-denuncia-${String(index + 1).padStart(2, '0')}-${limparNomeArquivo(item.file.name)}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
     });
 }
 

@@ -535,7 +535,7 @@ header.scrolled .nav-menu a:hover:not(.active) {
     transform: translateY(-2px);
 }
 
-/* Botões "Próximo" e "Gerar Boletim" (azul escuro) */
+/* Botões "Próximo" e "Gerar relatório" (azul escuro) */
 .btn-next, .btn-submit {
     background: var(--deep-blue);
     color: var(--white);
@@ -792,6 +792,162 @@ header.scrolled .nav-menu a:hover:not(.active) {
     color: var(--text-muted);
     font-size: 0.85rem;
     line-height: 1.5;
+}
+
+.foto-orientacao {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin-bottom: 16px;
+}
+
+.foto-upload-box {
+    position: relative;
+    border: 2px dashed rgba(0, 122, 255, 0.28);
+    border-radius: 18px;
+    background: rgba(0, 122, 255, 0.06);
+    padding: 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 14px;
+}
+
+.foto-upload-box:hover {
+    border-color: var(--primary-blue);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.foto-upload-box input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+.foto-upload-box span {
+    display: block;
+    color: var(--deep-blue);
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.foto-upload-box small,
+.fotos-progresso,
+.fotos-feedback {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.fotos-feedback[data-tipo="erro"] {
+    color: #D92D20;
+    font-weight: 600;
+}
+
+.fotos-feedback[data-tipo="sucesso"] {
+    color: #027A48;
+    font-weight: 600;
+}
+
+.fotos-preview {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0 8px;
+}
+
+.foto-preview-card {
+    background: var(--white);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+
+.foto-preview-card img {
+    width: 76px;
+    height: 76px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #E5E5EA;
+}
+
+.foto-preview-card strong,
+.foto-preview-card span,
+.foto-preview-card small {
+    display: block;
+    min-width: 0;
+}
+
+.foto-preview-card strong {
+    color: var(--deep-blue);
+    font-size: 0.86rem;
+}
+
+.foto-preview-card span {
+    color: var(--text-main);
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    margin: 3px 0;
+}
+
+.foto-preview-card small {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.btn-remover-foto {
+    grid-column: 1 / -1;
+    border: 0;
+    border-radius: 9px;
+    padding: 8px 10px;
+    background: rgba(217, 45, 32, 0.09);
+    color: #B42318;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-remover-foto:hover {
+    background: #D92D20;
+    color: var(--white);
+}
+
+.fotos-anexadas-revisao {
+    margin: 18px 0;
+}
+
+.fotos-anexadas-revisao h4 {
+    color: var(--deep-blue);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.fotos-preview-revisao .foto-preview-card {
+    grid-template-columns: 86px 1fr;
+}
+
+.fotos-preview-revisao .foto-preview-card img {
+    width: 86px;
+    height: 86px;
+}
+
+.fotos-sem-anexo {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    background: #F2F2F7;
+    border-radius: 12px;
+    padding: 12px;
 }
 
 /* Estilos para a Página DOE */
@@ -2295,6 +2451,10 @@ textarea:focus-visible {
     }
 
     .contatos-encaminhamento {
+        grid-template-columns: 1fr;
+    }
+
+    .fotos-preview {
         grid-template-columns: 1fr;
     }
 

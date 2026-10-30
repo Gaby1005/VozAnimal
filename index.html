@@ -274,24 +274,45 @@
                     </div>
                 </div>
 
-                <!-- Passo Final: Confirmação -->
+                <!-- Passo 5: Fotografias opcionais -->
                 <div class="form-step" data-step="5">
+                    <label for="fotos-denuncia">Fotografias do ocorrido (opcional)</label>
+                    <p class="foto-orientacao">
+                        Se possível, anexe fotografias que ajudem a demonstrar a situação relatada. As imagens poderão auxiliar na documentação dos fatos e serão encaminhadas juntamente com as informações da denúncia às autoridades competentes.
+                    </p>
+                    <div class="foto-upload-box">
+                        <input type="file" id="fotos-denuncia" name="fotos-denuncia" accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
+                        <span>Selecionar fotografias</span>
+                        <small>JPG, JPEG, PNG ou WEBP. Até 5 imagens, 10 MB cada.</small>
+                    </div>
+                    <div id="fotos-feedback" class="fotos-feedback" aria-live="polite"></div>
+                    <div id="fotos-preview" class="fotos-preview"></div>
+                    <div id="fotos-progresso" class="fotos-progresso" aria-live="polite"></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-prev">Voltar</button>
+                        <button type="button" class="btn-next">Próximo</button>
+                    </div>
+                </div>
+
+                <!-- Passo Final: Confirmação -->
+                <div class="form-step" data-step="6">
                     <label class="checkbox-confirm">
                         <input type="checkbox" id="confirmar-info" required> Declaro que todas as informações são verdadeiras
                     </label>
                     <div class="form-actions">
                         <button type="button" class="btn-prev">Voltar</button>
-                        <button type="submit" class="btn-submit">Gerar Boletim</button>
+                        <button type="submit" class="btn-submit">Gerar relatório</button>
                     </div>
                 </div>
             </form>
 
-            <!-- Tela de Revisão do Boletim (Oculta inicialmente) -->
+            <!-- Tela de Revisão do Relatório (Oculta inicialmente) -->
             <div id="boletim-revisao" style="display: none;">
-                <h3 class="form-title">REVISÃO DA DENÚNCIA</h3>
+                <h3 class="form-title">REVISÃO DO RELATÓRIO</h3>
                 <div class="boletim-content" id="boletim-texto">
-                    <!-- O texto do boletim será inserido aqui via JS -->
+                    <!-- O texto do relatório será inserido aqui via JS -->
                 </div>
+                <div id="fotos-anexadas-revisao" class="fotos-anexadas-revisao"></div>
 
                 <div class="encaminhar-section">
                     <h4>Para onde encaminhar:</h4>
@@ -312,13 +333,14 @@
                         </article>
                     </div>
                     <p class="email-orientacao">
-                        Baixe o PDF da denúncia, copie o e-mail do destinatário desejado e encaminhe pelo seu próprio aplicativo ou site de e-mail. Anexe o PDF manualmente antes de enviar. O Voz Animal não envia o e-mail automaticamente.
+                        Baixe o relatório em PDF, copie o e-mail do destinatário desejado e encaminhe pelo seu próprio aplicativo ou site de e-mail. Anexe o relatório e as fotografias manualmente antes de enviar. O Voz Animal não envia o e-mail automaticamente e não confirma o recebimento pelas instituições.
                     </p>
                 </div>
 
                 <div class="form-actions">
                     <button type="button" id="btn-editar-denuncia" class="btn-prev">Editar</button>
-                    <button type="button" id="btn-baixar-pdf" class="btn-submit">Baixar PDF</button>
+                    <button type="button" id="btn-baixar-fotos" class="btn-prev">Baixar fotografias</button>
+                    <button type="button" id="btn-baixar-pdf" class="btn-submit">Baixar relatório em PDF</button>
                 </div>
             </div>
         </div>
